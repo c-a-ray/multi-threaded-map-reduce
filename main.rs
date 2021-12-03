@@ -123,17 +123,19 @@ fn main() {
 
     // CHANGE CODE START: Don't change any code above this line
 
+    // Get a copy of the partitions
     let partition_1 = xs[0].clone();
     let partition_2 = xs[1].clone();
 
+    // Create the threads
     let thread_1 = thread::spawn(move || -> usize {
         map_data(&partition_1)
     });
-
     let thread_2 = thread::spawn(move || -> usize {
         map_data(&partition_2)
     });
 
+    // When threads finish, push results onto intermediate_sums
     intermediate_sums.push(thread_1.join().unwrap());
     intermediate_sums.push(thread_2.join().unwrap());
 
@@ -191,17 +193,28 @@ fn main() {
 * 
 */
 fn partition_data(num_partitions: usize, v: &Vec<usize>) -> Vec<Vec<usize>>{
+
     let partition_size = v.len() / num_partitions;
+    let mut remainder = v.len() % num_partitions; // Determine if there is an uneven number of elements
+
     let mut xs: Vec<Vec<usize>> = Vec::new();
     
-    let mut i = 0;
-    for _ in 0..num_partitions {
-        let mut x: Vec<usize> = Vec::new();
-        for _ in 0..partition_size {
-            x.push(v[i]);
-            i = i + 1;
+    let mut i = 0;                              // Index of current element in original vector
+
+    for _ in 0..num_partitions {                // Iterate num_partitions times
+        let mut x: Vec<usize> = Vec::new();     // Create new partition
+        for _ in 0..partition_size {            // Iterate partition_size times
+            x.push(v[i]);                       // Push the current vector element onto the partition
+            i = i + 1;                          // Move to next vector element
         }
-        xs.push(x);
+        
+        if remainder > 0 {                      // If there are still leftover elements
+            x.push(v[i]);                       // Push the current element onto the current partition
+            i = i + 1;                          // Move to the next element
+            remainder = remainder - 1;          // Decrement the number of remaining elements
+        }
+
+        xs.push(x);                             // Push the partition onto the partitions vector
     }
     xs
 }
